@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jasmine's To-Do List</title>
+    <title>To-Do List</title>
     <!-- Using the pixelated font "Press Start 2P" -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
-            padding: 18px;
-            background-color: #FFFFFF; /* Changed to white */
+            padding: 20px;
+            background-color: #FFFFFF; /* All white background */
             font-family: 'Press Start 2P';
         }
 
         .title {
             text-align: center;
             margin-bottom: 40px;
-            font-size: 26px;
+            font-size: 32px;
             letter-spacing: 2px;
             text-transform: uppercase;
             font-weight: 700;
@@ -37,9 +37,9 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background-color: #FEFAE0; /* Updated to off-white color */
+            background-color: #FEFAE0; /* Off-white color */
             border: none;
-            color: black; /* Changed text color to black for contrast */
+            color: black; /* Text color changed to black for contrast */
             font-size: 24px;
             cursor: pointer;
             display: flex;
@@ -58,7 +58,7 @@
         .section {
             flex: 1;
             padding: 20px;
-            background-color: #FFFFFF; /* Changed to white */
+            background-color: #FFFFFF; /* All white background */
             border-radius: 10px;
         }
 
@@ -67,9 +67,8 @@
             align-items: center;
             margin: 10px 0;
             padding: 10px;
-            background-color: #FFFFFF; /* Changed to white */
+            background-color: #FFFFFF; /* All white background */
             border-radius: 5px;
-            cursor: pointer;
             font-size: 14px;
             font-family: 'Press Start 2P';
         }
@@ -84,6 +83,7 @@
             flex-grow: 1;
             text-transform: uppercase;
             font-family: 'Press Start 2P';
+            cursor: pointer; /* Added cursor pointer for to-do text */
         }
 
         .todo-text.completed {
@@ -98,10 +98,9 @@
             padding: 5px 10px;
             border-radius: 3px;
             cursor: pointer;
-            margin-top: 5px;
             font-family: 'Press Start 2P';
             font-size: 14px;
-            text-transform: lowercase;
+            text-transform: uppercase;
         }
 
         .modal {
@@ -115,7 +114,7 @@
         }
 
         .modal-content {
-            background-color: #FFFFFF; /* Changed to white */
+            background-color: #FFFFFF; /* All white background */
             padding: 20px;
             border-radius: 10px;
             position: absolute;
@@ -131,7 +130,7 @@
             margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Press Start 2P';
             font-size: 14px;
         }
 
@@ -148,10 +147,10 @@
             border-radius: 5px;
             cursor: pointer;
             background-color: #ddd;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Press Start 2P';
             font-size: 14px;
             text-transform: uppercase;
-            color: black; /* Ensuring text is visible */
+            color: black; /* Text color for visibility */
         }
 
         .category-button.selected {
@@ -168,7 +167,7 @@
             border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Press Start 2P';
             font-size: 14px;
             text-transform: uppercase;
         }
@@ -212,8 +211,37 @@
             const taskInput = document.getElementById('new-task');
             const categoryButtons = document.querySelectorAll('.category-button');
             const addTaskButton = document.querySelector('.add-task-button');
-            
+
             let selectedCategory = null;
+            let todoData = {
+                activities: [],
+                food: []
+            };
+
+            // Function to update the URL hash with serialized to-do data
+            function updateURLHash() {
+                const hashData = encodeURIComponent(JSON.stringify(todoData));
+                window.location.hash = hashData;
+            }
+
+            // Function to load to-do data from the URL hash
+            function loadFromURLHash() {
+                const hash = window.location.hash.substring(1);
+                if (hash) {
+                    try {
+                        const data = JSON.parse(decodeURIComponent(hash));
+                        if (data.activities && data.food) {
+                            todoData = data;
+                            renderTodoList();
+                        }
+                    } catch (e) {
+                        console.error('Failed to parse to-do data from URL:', e);
+                    }
+                }
+            }
+
+            // Load to-do data when the page loads
+            loadFromURLHash();
 
             addButton.addEventListener('click', () => {
                 modal.style.display = 'block';
@@ -247,46 +275,87 @@
                 if (text && selectedCategory) {
                     addTodoItem(text, selectedCategory);
                     modal.style.display = 'none';
+                    updateURLHash();
                 }
             });
 
-            function addTodoItem(text, category) {
+            function addTodoItem(text, category, completed = false) {
                 const listId = category === 'activities' ? 'activities-list' : 'food-list';
                 const list = document.getElementById(listId);
-                
+
                 const todoItem = document.createElement('div');
                 todoItem.className = 'todo-item';
-                
+
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'todo-checkbox';
-                
+                checkbox.checked = completed;
+
                 const todoText = document.createElement('span');
                 todoText.className = 'todo-text';
                 todoText.textContent = text.toUpperCase();
-                
+
+                if (completed) {
+                    todoText.classList.add('completed');
+                }
+
                 const removeButton = document.createElement('button');
                 removeButton.className = 'remove-button';
                 removeButton.textContent = 'REMOVE';
-                
+
                 todoItem.appendChild(checkbox);
                 todoItem.appendChild(todoText);
                 todoItem.appendChild(removeButton);
                 list.appendChild(todoItem);
 
-                checkbox.addEventListener('change', () => {
+                // Save the item in todoData
+                todoData[category].push({ text, completed });
+
+                // Event listener for the checkbox
+                checkbox.addEventListener('change', (e) => {
                     todoText.classList.toggle('completed');
+                    const index = Array.from(list.children).indexOf(todoItem);
+                    todoData[category][index].completed = checkbox.checked;
+                    updateURLHash();
+                    e.stopPropagation(); // Prevent triggering parent click events
                 });
 
-                todoItem.addEventListener('click', () => {
+                // Event listener for the to-do text
+                todoText.addEventListener('click', (e) => {
                     removeButton.style.display = removeButton.style.display === 'none' ? 'block' : 'none';
+                    e.stopPropagation(); // Prevent triggering parent click events
                 });
 
+                // Event listener for the remove button
                 removeButton.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    const index = Array.from(list.children).indexOf(todoItem);
+                    todoData[category].splice(index, 1);
                     todoItem.remove();
+                    updateURLHash();
                 });
             }
+
+            function renderTodoList() {
+                // Clear existing items
+                document.getElementById('activities-list').innerHTML = '';
+                document.getElementById('food-list').innerHTML = '';
+
+                // Render activities
+                todoData.activities.forEach(item => {
+                    addTodoItem(item.text, 'activities', item.completed);
+                });
+
+                // Render food items
+                todoData.food.forEach(item => {
+                    addTodoItem(item.text, 'food', item.completed);
+                });
+            }
+
+            // Re-render the to-do list if the URL hash changes (e.g., when the link is shared)
+            window.addEventListener('hashchange', () => {
+                loadFromURLHash();
+            });
         });
     </script>
 </body>
