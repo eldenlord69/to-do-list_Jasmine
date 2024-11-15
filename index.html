@@ -31,21 +31,22 @@
         }
 
         .add-button {
-            position: absolute;
-            top: 20px;
+            position: fixed;
+            bottom: 20px;
             right: 20px;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background-color: #FEFAE0; /* Off-white color */
             border: none;
             color: black; /* Text color changed to black for contrast */
-            font-size: 24px;
+            font-size: 36px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Press Start 2P';
+            z-index: 1000;
         }
 
         .container {
@@ -53,10 +54,11 @@
             gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
+            flex-wrap: wrap;
         }
 
         .section {
-            flex: 1;
+            flex: 1 1 calc(50% - 20px);
             padding: 20px;
             background-color: #FFFFFF; /* All white background */
             border-radius: 10px;
@@ -75,15 +77,15 @@
 
         .todo-checkbox {
             margin-right: 10px;
-            width: 18px;
-            height: 18px;
+            width: 24px;
+            height: 24px;
         }
 
         .todo-text {
             flex-grow: 1;
             text-transform: uppercase;
             font-family: 'Press Start 2P';
-            cursor: pointer; /* Added cursor pointer for to-do text */
+            cursor: pointer;
         }
 
         .todo-text.completed {
@@ -95,7 +97,7 @@
             background-color: #ff4444;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 10px 15px;
             border-radius: 3px;
             cursor: pointer;
             font-family: 'Press Start 2P';
@@ -122,11 +124,13 @@
             left: 50%;
             transform: translate(-50%, -50%);
             min-width: 300px;
+            width: 90%;
+            max-width: 500px;
         }
 
         .modal input {
             width: 100%;
-            padding: 10px;
+            padding: 15px;
             margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -142,7 +146,7 @@
 
         .category-button {
             flex: 1;
-            padding: 10px;
+            padding: 15px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -160,7 +164,7 @@
 
         .add-task-button {
             width: 100%;
-            padding: 10px;
+            padding: 15px;
             background-color: #4CAF50;
             color: white;
             border: none;
@@ -176,7 +180,61 @@
             background-color: #ddd;
             cursor: not-allowed;
         }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .section {
+                flex: 1 1 100%;
+                margin-bottom: 20px;
+            }
+
+            .title {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .section-header {
+                font-size: 16px;
+            }
+
+            .todo-item {
+                font-size: 12px;
+            }
+
+            .add-button {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+
+            .modal-content {
+                width: 90%;
+            }
+
+            .modal input,
+            .category-button,
+            .add-task-button {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            .todo-checkbox {
+                width: 20px;
+                height: 20px;
+            }
+
+            .remove-button {
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+        }
     </style>
+    <!-- Meta viewport tag for mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <h1 class="title">TO-DO LIST</h1>
@@ -217,10 +275,12 @@
                 activities: [],
                 food: []
             };
+            let ignoreHashChange = false;
 
             // Function to update the URL hash with serialized to-do data
             function updateURLHash() {
                 const hashData = encodeURIComponent(JSON.stringify(todoData));
+                ignoreHashChange = true;
                 window.location.hash = hashData;
             }
 
@@ -237,6 +297,10 @@
                     } catch (e) {
                         console.error('Failed to parse to-do data from URL:', e);
                     }
+                } else {
+                    // If no hash, reset the todoData and render empty lists
+                    todoData = { activities: [], food: [] };
+                    renderTodoList();
                 }
             }
 
@@ -279,7 +343,7 @@
                 }
             });
 
-            function addTodoItem(text, category, completed = false) {
+            function addTodoItem(text, category, completed = false, addToData = true) {
                 const listId = category === 'activities' ? 'activities-list' : 'food-list';
                 const list = document.getElementById(listId);
 
@@ -308,8 +372,10 @@
                 todoItem.appendChild(removeButton);
                 list.appendChild(todoItem);
 
-                // Save the item in todoData
-                todoData[category].push({ text, completed });
+                // Save the item in todoData only if addToData is true
+                if (addToData) {
+                    todoData[category].push({ text, completed });
+                }
 
                 // Event listener for the checkbox
                 checkbox.addEventListener('change', (e) => {
@@ -343,18 +409,22 @@
 
                 // Render activities
                 todoData.activities.forEach(item => {
-                    addTodoItem(item.text, 'activities', item.completed);
+                    addTodoItem(item.text, 'activities', item.completed, false);
                 });
 
                 // Render food items
                 todoData.food.forEach(item => {
-                    addTodoItem(item.text, 'food', item.completed);
+                    addTodoItem(item.text, 'food', item.completed, false);
                 });
             }
 
             // Re-render the to-do list if the URL hash changes (e.g., when the link is shared)
             window.addEventListener('hashchange', () => {
-                loadFromURLHash();
+                if (ignoreHashChange) {
+                    ignoreHashChange = false;
+                } else {
+                    loadFromURLHash();
+                }
             });
         });
     </script>
