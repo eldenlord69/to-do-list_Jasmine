@@ -6,6 +6,7 @@
     <!-- Using the pixelated font "Press Start 2P" -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
+        /* Your existing CSS styles remain unchanged */
         body {
             margin: 0;
             padding: 20px;
@@ -15,14 +16,25 @@
         .title {
             text-align: center;
             margin-bottom: 40px;
-            font-size: clamp(4px, 5vw, 10px); /* Adjusted font size */
+            font-size: 18px; /* Default font size */
             letter-spacing: 1px;
             text-transform: uppercase;
             font-weight: 700;
             white-space: nowrap;
         }
+        /* Media Queries for Responsive Font Size */
+        @media screen and (max-width: 768px) {
+            .title {
+                font-size: 18px;
+            }
+        }
+        @media screen and (max-width: 480px) {
+            .title {
+                font-size: 16px;
+            }
+        }
         .section-header {
-            font-size: 16px; 
+            font-size: 15px; 
             text-decoration: underline;
             margin-bottom: 20px;
             font-weight: bold;
@@ -182,8 +194,9 @@
                 flex: 1 1 100%;
                 margin-bottom: 20px;
             }
+            /* Adjusted title font size for medium screens */
             .title {
-                font-size: clamp(16px, 6vw, 22px); /* Adjusted font size */
+                font-size: 24px;
                 margin-bottom: 20px;
             }
             .section-header {
@@ -215,6 +228,12 @@
             .remove-button {
                 font-size: 10px;
                 padding: 4px 8px;
+            }
+        }
+        @media (max-width: 480px) {
+            /* Adjusted title font size for small screens */
+            .title {
+                font-size: 20px;
             }
         }
     </style>
@@ -258,20 +277,21 @@
                 food: []
             };
             let ignoreHashChange = false;
+
+            // Updated updateURLHash function with custom serialization
             function updateURLHash() {
-                const hashData = encodeURIComponent(JSON.stringify(todoData));
+                const serializedData = serializeTodoData(todoData);
                 ignoreHashChange = true;
-                window.location.hash = hashData;
+                window.location.hash = encodeURIComponent(serializedData);
             }
+
+            // Updated loadFromURLHash function with custom deserialization
             function loadFromURLHash() {
-                const hash = window.location.hash.substring(1);
+                const hash = decodeURIComponent(window.location.hash.substring(1));
                 if (hash) {
                     try {
-                        const data = JSON.parse(decodeURIComponent(hash));
-                        if (data.activities && data.food) {
-                            todoData = data;
-                            renderTodoList();
-                        }
+                        todoData = deserializeTodoData(hash);
+                        renderTodoList();
                     } catch (e) {
                         console.error('Failed to parse to-do data from URL:', e);
                     }
@@ -280,7 +300,47 @@
                     renderTodoList();
                 }
             }
+
+            // Custom serialization function
+            function serializeTodoData(data) {
+                const categories = [];
+                for (const [key, tasks] of Object.entries(data)) {
+                    const categoryCode = key.charAt(0).toUpperCase(); // 'A' for activities, 'F' for food
+                    const serializedTasks = tasks.map(task => {
+                        const status = task.completed ? '1' : '0';
+                        // Escape any special characters in task text
+                        const text = task.text.replace(/[:;|\\]/g, char => '\\' + char);
+                        return status + text;
+                    }).join('|');
+                    categories.push(`${categoryCode}:${serializedTasks}`);
+                }
+                return categories.join(';');
+            }
+
+            // Custom deserialization function
+            function deserializeTodoData(serializedData) {
+                const data = { activities: [], food: [] };
+                const categories = serializedData.split(';');
+                for (const category of categories) {
+                    const [categoryCode, tasksString] = category.split(':');
+                    const key = categoryCode === 'A' ? 'activities' : 'food';
+                    const tasks = tasksString ? tasksString.split('|') : [];
+                    data[key] = tasks.map(taskString => {
+                        const status = taskString.charAt(0);
+                        let text = taskString.substring(1);
+                        // Unescape special characters
+                        text = text.replace(/\\([:;|\\])/g, '$1');
+                        return {
+                            text,
+                            completed: status === '1'
+                        };
+                    });
+                }
+                return data;
+            }
+
             loadFromURLHash();
+
             addButton.addEventListener('click', () => {
                 modal.style.display = 'block';
                 taskInput.value = '';
@@ -288,11 +348,13 @@
                 categoryButtons.forEach(btn => btn.classList.remove('selected'));
                 addTaskButton.disabled = true;
             });
+
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.style.display = 'none';
                 }
             });
+
             categoryButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     categoryButtons.forEach(btn => btn.classList.remove('selected'));
@@ -301,9 +363,11 @@
                     addTaskButton.disabled = !taskInput.value;
                 });
             });
+
             taskInput.addEventListener('input', () => {
                 addTaskButton.disabled = !taskInput.value || !selectedCategory;
             });
+
             addTaskButton.addEventListener('click', () => {
                 const text = taskInput.value.trim();
                 if (text && selectedCategory) {
@@ -312,31 +376,38 @@
                     updateURLHash();
                 }
             });
+
             function addTodoItem(text, category, completed = false, addToData = true) {
                 const listId = category === 'activities' ? 'activities-list' : 'food-list';
                 const list = document.getElementById(listId);
                 const todoItem = document.createElement('div');
                 todoItem.className = 'todo-item';
+
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'todo-checkbox';
                 checkbox.checked = completed;
+
                 const todoText = document.createElement('span');
                 todoText.className = 'todo-text';
                 todoText.textContent = text.toUpperCase();
                 if (completed) {
                     todoText.classList.add('completed');
                 }
+
                 const removeButton = document.createElement('button');
                 removeButton.className = 'remove-button';
                 removeButton.textContent = 'REMOVE';
+
                 todoItem.appendChild(checkbox);
                 todoItem.appendChild(todoText);
                 todoItem.appendChild(removeButton);
                 list.appendChild(todoItem);
+
                 if (addToData) {
                     todoData[category].push({ text, completed });
                 }
+
                 checkbox.addEventListener('change', (e) => {
                     todoText.classList.toggle('completed');
                     const index = Array.from(list.children).indexOf(todoItem);
@@ -344,10 +415,12 @@
                     updateURLHash();
                     e.stopPropagation();
                 });
+
                 todoText.addEventListener('click', (e) => {
                     removeButton.style.display = removeButton.style.display === 'none' ? 'block' : 'none';
                     e.stopPropagation();
                 });
+
                 removeButton.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const index = Array.from(list.children).indexOf(todoItem);
@@ -356,6 +429,7 @@
                     updateURLHash();
                 });
             }
+
             function renderTodoList() {
                 document.getElementById('activities-list').innerHTML = '';
                 document.getElementById('food-list').innerHTML = '';
@@ -366,6 +440,7 @@
                     addTodoItem(item.text, 'food', item.completed, false);
                 });
             }
+
             window.addEventListener('hashchange', () => {
                 if (ignoreHashChange) {
                     ignoreHashChange = false;
