@@ -32,15 +32,16 @@
 
         .add-button {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
+            bottom: 40px; /* Moved up from the bottom */
+            left: 50%;    /* Center horizontally */
+            transform: translateX(-50%); /* Adjust for element width */
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             background-color: #FEFAE0; /* Off-white color */
             border: none;
             color: black; /* Text color changed to black for contrast */
-            font-size: 36px;
+            font-size: 38px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -89,7 +90,7 @@
         }
 
         .todo-text.completed {
-            text-decoration: line-through;
+            text-decoration: line-through double; /* Double line-through */
         }
 
         .remove-button {
@@ -219,6 +220,7 @@
                 width: 50px;
                 height: 50px;
                 font-size: 24px;
+                bottom: 30px; /* Adjusted for mobile */
             }
 
             .modal-content {
@@ -248,7 +250,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h1 class="title">TO-DO LIST</h1>
+    <h1 class="title">Jasmine's To-Do List</h1>
     <button class="add-button">+</button>
 
     <div class="container">
