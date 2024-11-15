@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Jasmine's To-Do List</title>
+    <!-- Using the pixelated font "Press Start 2P" -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
@@ -14,15 +15,14 @@
         .title {
             text-align: center;
             margin-bottom: 40px;
-            font-size: 5vw; /* Responsive font size */
-            max-font-size: 26px; /* Maximum font size */
-            letter-spacing: 1px; /* Reduced letter spacing */
+            font-size: clamp(19px, 5vw, 26px); /* Responsive font size with min and max */
+            letter-spacing: 1px;
             text-transform: uppercase;
             font-weight: 700;
-            white-space: nowrap; /* Prevent text from wrapping */
+            white-space: nowrap;
         }
         .section-header {
-            font-size: 14px;
+            font-size: 18px; /* Increased by 20% back to previous size */
             text-decoration: underline;
             margin-bottom: 20px;
             font-weight: bold;
@@ -39,7 +39,7 @@
             background-color: #FEFAE0;
             border: none;
             color: black;
-            font-size: 29px;
+            font-size: 36px; /* Increased by 20% back to previous size */
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -94,7 +94,7 @@
             border-radius: 3px;
             cursor: pointer;
             font-family: 'Press Start 2P';
-            font-size: 10px;
+            font-size: 12px; /* Increased by 20% back to previous size */
             text-transform: lowercase;
         }
         .modal {
@@ -147,7 +147,7 @@
             cursor: pointer;
             background-color: #ddd;
             font-family: 'Press Start 2P';
-            font-size: 11px;
+            font-size: 14px; /* Increased by 20% back to previous size */
             text-transform: uppercase;
             color: black;
             box-sizing: border-box;
@@ -166,7 +166,7 @@
             cursor: pointer;
             margin-top: 10px;
             font-family: 'Press Start 2P';
-            font-size: 11px;
+            font-size: 14px; /* Increased by 20% back to previous size */
             text-transform: lowercase;
             box-sizing: border-box;
         }
@@ -183,12 +183,11 @@
                 margin-bottom: 20px;
             }
             .title {
-                font-size: 6vw; /* Responsive font size for smaller screens */
-                max-font-size: 19px;
+                font-size: clamp(19px, 6vw, 26px);
                 margin-bottom: 20px;
             }
             .section-header {
-                font-size: 13px;
+                font-size: 16px; /* Adjusted for mobile */
             }
             .todo-item {
                 font-size: 9px;
@@ -196,7 +195,7 @@
             .add-button {
                 width: 50px;
                 height: 50px;
-                font-size: 19px;
+                font-size: 24px; /* Increased by 20% back to previous size */
                 bottom: 30px;
             }
             .modal-content {
@@ -206,7 +205,7 @@
             .modal input,
             .category-button,
             .add-task-button {
-                font-size: 9px;
+                font-size: 12px; /* Increased by 20% back to previous size */
                 padding: 8px;
             }
             .todo-checkbox {
@@ -214,7 +213,7 @@
                 height: 18px;
             }
             .remove-button {
-                font-size: 8px;
+                font-size: 10px; /* Increased by 20% back to previous size */
                 padding: 4px 8px;
             }
         }
