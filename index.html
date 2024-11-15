@@ -3,59 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <title>Jasmine's To-Do List</title>
-    <!-- Using the pixelated font "Press Start 2P" -->
+    <!-- Importing the pixelated font "Press Start 2P" -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
+        /* Mobile-optimized CSS with pixelated font */
         body {
             margin: 0;
             padding: 20px;
             background-color: #FFFFFF;
-            font-family: 'Press Start 2P', sans-serif;
+            font-family: 'Press Start 2P'; /* Removed fallback fonts */
         }
         .title {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 18px;
+            margin-bottom: 40px;
+            font-size: 20px; /* Optimized for mobile */
             letter-spacing: 1px;
             text-transform: uppercase;
-            font-weight: bold;
+            font-weight: 700;
             white-space: nowrap;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
         }
         .section-header {
             font-size: 14px; 
             text-decoration: underline;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             font-weight: bold;
             text-transform: uppercase;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
         }
         .add-button {
             position: fixed;
-            bottom: 20px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background-color: #FEFAE0;
             border: none;
             color: black;
-            font-size: 24px; 
+            font-size: 32px; 
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Press Start 2P', sans-serif;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
             z-index: 1000;
         }
         .container {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            flex-direction: column; /* Stack sections vertically */
+            gap: 20px;
             max-width: 100%;
             margin: 0 auto;
         }
         .section {
-            padding: 10px;
+            flex: 1 1 100%;
+            padding: 20px;
             background-color: #FFFFFF;
             border-radius: 10px;
         }
@@ -65,24 +69,21 @@
             margin: 2px 0;
             padding: 4px;
             background-color: #FFFFFF;
-            border-radius: 0;
             font-size: 11px;
-            font-family: 'Press Start 2P', sans-serif;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
         }
         .todo-checkbox {
             margin-right: 8px;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
         }
         .todo-text {
             flex-grow: 1;
             text-transform: uppercase;
-            font-family: 'Press Start 2P', sans-serif;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
             cursor: pointer;
             line-height: 1;
-            font-weight: bold;
-            font-style: normal;
-            text-decoration: none;
+            text-decoration: none; /* Ensure text decoration can be applied */
         }
         .todo-text.completed {
             text-decoration: line-through;
@@ -92,10 +93,10 @@
             background-color: #ff4444;
             color: white;
             border: none;
-            padding: 4px 6px;
+            padding: 6px 10px;
             border-radius: 3px;
             cursor: pointer;
-            font-family: 'Press Start 2P', sans-serif;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
             font-size: 10px; 
             text-transform: lowercase;
         }
@@ -110,13 +111,13 @@
         }
         .modal-content {
             background-color: #FFFFFF;
-            padding: 10px;
+            padding: 20px;
             border-radius: 10px;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;
+            width: 80%;
             max-width: 300px;
             box-sizing: border-box;
         }
@@ -127,28 +128,28 @@
         }
         .modal input {
             width: 100%;
-            padding: 8px;
-            margin: 8px 0;
+            padding: 12px;
+            margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-family: 'Press Start 2P', sans-serif;
-            font-size: 10px;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            font-size: 11px;
             box-sizing: border-box;
         }
         .category-buttons {
             display: flex;
-            gap: 8px;
-            margin: 10px 0;
+            gap: 10px;
+            margin: 15px 0;
             width: 100%;
         }
         .category-button {
             flex: 1;
-            padding: 8px;
+            padding: 12px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             background-color: #ddd;
-            font-family: 'Press Start 2P', sans-serif;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
             font-size: 12px;
             text-transform: uppercase;
             color: black;
@@ -160,14 +161,14 @@
         }
         .add-task-button {
             width: 100%;
-            padding: 8px;
+            padding: 12px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 8px;
-            font-family: 'Press Start 2P', sans-serif;
+            margin-top: 10px;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
             font-size: 12px;
             text-transform: lowercase;
             box-sizing: border-box;
@@ -349,7 +350,7 @@
                 }
 
                 checkbox.addEventListener('change', (e) => {
-                    todoText.classList.toggle('completed');
+                    todoText.classList.toggle('completed', checkbox.checked);
                     const index = Array.from(list.children).indexOf(todoItem);
                     todoData[category][index].completed = checkbox.checked;
                     updateURLHash();
