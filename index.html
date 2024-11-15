@@ -3,72 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <title>Jasmine's To-Do List</title>
-    <!-- Using the pixelated font "Press Start 2P" -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <!-- Using the pixelated font "Press Start 2P" and Arial -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
     <style>
-        /* Your existing CSS styles remain unchanged */
         body {
             margin: 0;
             padding: 20px;
             background-color: #FFFFFF;
-            font-family: 'Press Start 2P';
+            font-family: 'Press Start 2P', sans-serif;
         }
         .title {
             text-align: center;
-            margin-bottom: 40px;
-            font-size: 20px; /* Default font size */
+            margin-bottom: 20px;
+            font-size: 18px;
             letter-spacing: 1px;
             text-transform: uppercase;
-            font-weight: 700;
+            font-weight: bold;
             white-space: nowrap;
-        }
-        /* Media Queries for Responsive Font Size */
-        @media screen and (max-width: 768px) {
-            .title {
-                font-size: 20px;
-            }
-        }
-        @media screen and (max-width: 480px) {
-            .title {
-                font-size: 18px;
-            }
         }
         .section-header {
             font-size: 14px; 
             text-decoration: underline;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             font-weight: bold;
             text-transform: uppercase;
         }
         .add-button {
             position: fixed;
-            bottom: 40px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background-color: #FEFAE0;
             border: none;
             color: black;
-            font-size: 32px; 
+            font-size: 24px; 
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Press Start 2P';
+            font-family: 'Press Start 2P', sans-serif;
             z-index: 1000;
         }
         .container {
             display: flex;
-            gap: 20px;
-            max-width: 1200px;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 100%;
             margin: 0 auto;
-            flex-wrap: wrap;
         }
         .section {
-            flex: 1 1 calc(50% - 20px);
-            padding: 20px;
+            padding: 10px;
             background-color: #FFFFFF;
             border-radius: 10px;
         }
@@ -79,33 +66,39 @@
             padding: 4px;
             background-color: #FFFFFF;
             border-radius: 0;
-            font-size: 11px; /* Increased font size */
-            font-family: 'Press Start 2P';
+            font-size: 11px;
+            font-family: 'Press Start 2P', sans-serif;
         }
         .todo-checkbox {
             margin-right: 8px;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
         }
         .todo-text {
             flex-grow: 1;
             text-transform: uppercase;
-            font-family: 'Press Start 2P';
+            font-family: 'Press Start 2P', sans-serif;
             cursor: pointer;
             line-height: 1;
+            font-weight: bold;
+            font-style: normal;
+            text-decoration: none;
         }
         .todo-text.completed {
-            text-decoration: line-through double;
+            font-family: Arial, sans-serif;
+            font-style: italic;
+            font-weight: normal;
+            text-decoration: line-through;
         }
         .remove-button {
             display: none;
             background-color: #ff4444;
             color: white;
             border: none;
-            padding: 6px 10px;
+            padding: 4px 6px;
             border-radius: 3px;
             cursor: pointer;
-            font-family: 'Press Start 2P';
+            font-family: Arial, sans-serif;
             font-size: 10px; 
             text-transform: lowercase;
         }
@@ -120,14 +113,14 @@
         }
         .modal-content {
             background-color: #FFFFFF;
-            padding: 20px;
+            padding: 10px;
             border-radius: 10px;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
-            max-width: 400px;
+            max-width: 300px;
             box-sizing: border-box;
         }
         .modal-content-inner {
@@ -137,29 +130,29 @@
         }
         .modal input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+            padding: 8px;
+            margin: 8px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-family: 'Press Start 2P';
-            font-size: 11px;
+            font-family: 'Press Start 2P', sans-serif;
+            font-size: 10px;
             box-sizing: border-box;
         }
         .category-buttons {
             display: flex;
-            gap: 10px;
-            margin: 15px 0;
+            gap: 8px;
+            margin: 10px 0;
             width: 100%;
         }
         .category-button {
             flex: 1;
-            padding: 12px;
+            padding: 8px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             background-color: #ddd;
-            font-family: 'Press Start 2P';
-            font-size: 14px;
+            font-family: 'Press Start 2P', sans-serif;
+            font-size: 12px;
             text-transform: uppercase;
             color: black;
             box-sizing: border-box;
@@ -170,71 +163,21 @@
         }
         .add-task-button {
             width: 100%;
-            padding: 12px;
+            padding: 8px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
-            font-family: 'Press Start 2P';
-            font-size: 14px;
+            margin-top: 8px;
+            font-family: 'Press Start 2P', sans-serif;
+            font-size: 12px;
             text-transform: lowercase;
             box-sizing: border-box;
         }
         .add-task-button:disabled {
             background-color: #ddd;
             cursor: not-allowed;
-        }
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            .section {
-                flex: 1 1 100%;
-                margin-bottom: 20px;
-            }
-            /* Adjusted title font size for medium screens */
-            .title {
-                font-size: 20px;
-                margin-bottom: 20px;
-            }
-            .section-header {
-                font-size: 14px;
-            }
-            .todo-item {
-                font-size: 11px; /* Adjusted for mobile */
-            }
-            .add-button {
-                width: 50px;
-                height: 50px;
-                font-size: 22px; 
-                bottom: 30px;
-            }
-            .modal-content {
-                width: 80%;
-                max-width: 300px;
-            }
-            .modal input,
-            .category-button,
-            .add-task-button {
-                font-size: 12px;
-                padding: 8px;
-            }
-            .todo-checkbox {
-                width: 18px;
-                height: 18px;
-            }
-            .remove-button {
-                font-size: 10px;
-                padding: 4px 8px;
-            }
-        }
-        @media (max-width: 480px) {
-            /* Adjusted title font size for small screens */
-            .title {
-                font-size: 18px;
-            }
         }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
