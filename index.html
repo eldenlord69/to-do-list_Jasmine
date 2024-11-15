@@ -3,45 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <title>Jasmine's To-Do List</title>
-    <!-- Using the pixelated font "Press Start 2P" -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             padding: 20px;
-            background-color: #FFFFFF; /* All white background */
+            background-color: #FFFFFF;
             font-family: 'Press Start 2P';
         }
-
         .title {
             text-align: center;
             margin-bottom: 40px;
-            font-size: 32px;
+            font-size: 26px;
             letter-spacing: 2px;
             text-transform: uppercase;
             font-weight: 700;
         }
-
         .section-header {
-            font-size: 18px;
+            font-size: 14px;
             text-decoration: underline;
             margin-bottom: 20px;
             font-weight: bold;
             text-transform: uppercase;
         }
-
         .add-button {
             position: fixed;
-            bottom: 40px; /* Moved up from the bottom */
-            left: 50%;    /* Center horizontally */
-            transform: translateX(-50%); /* Adjust for element width */
-            width: 70px;
-            height: 70px;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            background-color: #FEFAE0; /* Off-white color */
+            background-color: #FEFAE0;
             border: none;
-            color: black; /* Text color changed to black for contrast */
-            font-size: 38px;
+            color: black;
+            font-size: 29px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -49,7 +45,6 @@
             font-family: 'Press Start 2P';
             z-index: 1000;
         }
-
         .container {
             display: flex;
             gap: 20px;
@@ -57,55 +52,49 @@
             margin: 0 auto;
             flex-wrap: wrap;
         }
-
         .section {
             flex: 1 1 calc(50% - 20px);
             padding: 20px;
-            background-color: #FFFFFF; /* All white background */
+            background-color: #FFFFFF;
             border-radius: 10px;
         }
-
         .todo-item {
             display: flex;
             align-items: center;
-            margin: 5px 0; /* Reduced vertical spacing */
-            padding: 8px;   /* Adjusted padding for better compactness */
-            background-color: #FFFFFF; /* All white background */
-            border-radius: 5px;
-            font-size: 14px;
+            margin: 2px 0;
+            padding: 4px;
+            background-color: #FFFFFF;
+            border-radius: 0;
+            font-size: 11px;
             font-family: 'Press Start 2P';
         }
-
         .todo-checkbox {
-            margin-right: 10px;
-            width: 24px;
-            height: 24px;
+            margin-right: 8px;
+            width: 20px;
+            height: 20px;
         }
-
         .todo-text {
             flex-grow: 1;
             text-transform: uppercase;
             font-family: 'Press Start 2P';
             cursor: pointer;
+            line-height: 1;
         }
-
         .todo-text.completed {
-            text-decoration: line-through double; /* Double line-through */
+            text-decoration: line-through double;
         }
-
         .remove-button {
             display: none;
             background-color: #ff4444;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 6px 10px;
             border-radius: 3px;
             cursor: pointer;
             font-family: 'Press Start 2P';
-            font-size: 14px;
+            font-size: 10px;
             text-transform: lowercase;
         }
-
         .modal {
             display: none;
             position: fixed;
@@ -115,9 +104,8 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
         }
-
         .modal-content {
-            background-color: #FFFFFF; /* All white background */
+            background-color: #FFFFFF;
             padding: 20px;
             border-radius: 10px;
             position: absolute;
@@ -125,56 +113,50 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
-            max-width: 400px; /* Adjusted max-width for better alignment */
-            box-sizing: border-box; /* Ensure padding doesn't affect total width */
+            max-width: 400px;
+            box-sizing: border-box;
         }
-
         .modal-content-inner {
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center align all child elements */
+            align-items: center;
         }
-
         .modal input {
             width: 100%;
-            padding: 12px; /* Adjusted padding */
+            padding: 12px;
             margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-family: 'Press Start 2P';
-            font-size: 14px;
+            font-size: 11px;
             box-sizing: border-box;
         }
-
         .category-buttons {
             display: flex;
             gap: 10px;
             margin: 15px 0;
-            width: 100%; /* Ensure buttons span full width */
+            width: 100%;
         }
-
         .category-button {
             flex: 1;
-            padding: 12px; /* Adjusted padding */
+            padding: 12px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             background-color: #ddd;
             font-family: 'Press Start 2P';
-            font-size: 14px;
+            font-size: 11px;
             text-transform: uppercase;
-            color: black; /* Text color for visibility */
+            color: black;
             box-sizing: border-box;
         }
-
         .category-button.selected {
             background-color: #4CAF50;
             color: white;
         }
-
         .add-task-button {
-            width: 100%; /* Span full width */
-            padding: 12px; /* Adjusted padding */
+            width: 100%;
+            padding: 12px;
             background-color: #4CAF50;
             color: white;
             border: none;
@@ -182,77 +164,63 @@
             cursor: pointer;
             margin-top: 10px;
             font-family: 'Press Start 2P';
-            font-size: 14px;
+            font-size: 11px;
             text-transform: lowercase;
             box-sizing: border-box;
         }
-
         .add-task-button:disabled {
             background-color: #ddd;
             cursor: not-allowed;
         }
-
-        /* Responsive Styles */
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
             }
-
             .section {
                 flex: 1 1 100%;
                 margin-bottom: 20px;
             }
-
             .title {
-                font-size: 24px;
+                font-size: 19px;
                 margin-bottom: 20px;
             }
-
             .section-header {
-                font-size: 16px;
+                font-size: 13px;
             }
-
             .todo-item {
-                font-size: 12px;
+                font-size: 9px;
             }
-
             .add-button {
                 width: 50px;
                 height: 50px;
-                font-size: 24px;
-                bottom: 30px; /* Adjusted for mobile */
+                font-size: 19px;
+                bottom: 30px;
             }
-
             .modal-content {
                 width: 90%;
-                max-width: 300px; /* Adjusted for smaller screens */
+                max-width: 300px;
             }
-
             .modal input,
             .category-button,
             .add-task-button {
-                font-size: 12px;
+                font-size: 9px;
                 padding: 8px;
             }
-
             .todo-checkbox {
-                width: 20px;
-                height: 20px;
+                width: 18px;
+                height: 18px;
             }
-
             .remove-button {
-                font-size: 12px;
-                padding: 5px 10px;
+                font-size: 8px;
+                padding: 4px 8px;
             }
         }
     </style>
-    <!-- Meta viewport tag for mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <h1 class="title">Jasmine's To-Do List</h1>
     <button class="add-button">+</button>
-
     <div class="container">
         <div class="section">
             <h2 class="section-header">ACTIVITIES</h2>
@@ -263,7 +231,6 @@
             <div id="food-list"></div>
         </div>
     </div>
-
     <div class="modal" id="add-modal">
         <div class="modal-content">
             <div class="modal-content-inner">
@@ -276,31 +243,24 @@
             </div>
         </div>
     </div>
-
     <script>
-        // Your existing JavaScript code remains unchanged
         document.addEventListener('DOMContentLoaded', () => {
             const addButton = document.querySelector('.add-button');
             const modal = document.getElementById('add-modal');
             const taskInput = document.getElementById('new-task');
             const categoryButtons = document.querySelectorAll('.category-button');
             const addTaskButton = document.querySelector('.add-task-button');
-
             let selectedCategory = null;
             let todoData = {
                 activities: [],
                 food: []
             };
             let ignoreHashChange = false;
-
-            // Function to update the URL hash with serialized to-do data
             function updateURLHash() {
                 const hashData = encodeURIComponent(JSON.stringify(todoData));
                 ignoreHashChange = true;
                 window.location.hash = hashData;
             }
-
-            // Function to load to-do data from the URL hash
             function loadFromURLHash() {
                 const hash = window.location.hash.substring(1);
                 if (hash) {
@@ -314,15 +274,11 @@
                         console.error('Failed to parse to-do data from URL:', e);
                     }
                 } else {
-                    // If no hash, reset the todoData and render empty lists
                     todoData = { activities: [], food: [] };
                     renderTodoList();
                 }
             }
-
-            // Load to-do data when the page loads
             loadFromURLHash();
-
             addButton.addEventListener('click', () => {
                 modal.style.display = 'block';
                 taskInput.value = '';
@@ -330,13 +286,11 @@
                 categoryButtons.forEach(btn => btn.classList.remove('selected'));
                 addTaskButton.disabled = true;
             });
-
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.style.display = 'none';
                 }
             });
-
             categoryButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     categoryButtons.forEach(btn => btn.classList.remove('selected'));
@@ -345,11 +299,9 @@
                     addTaskButton.disabled = !taskInput.value;
                 });
             });
-
             taskInput.addEventListener('input', () => {
                 addTaskButton.disabled = !taskInput.value || !selectedCategory;
             });
-
             addTaskButton.addEventListener('click', () => {
                 const text = taskInput.value.trim();
                 if (text && selectedCategory) {
@@ -358,57 +310,42 @@
                     updateURLHash();
                 }
             });
-
             function addTodoItem(text, category, completed = false, addToData = true) {
                 const listId = category === 'activities' ? 'activities-list' : 'food-list';
                 const list = document.getElementById(listId);
-
                 const todoItem = document.createElement('div');
                 todoItem.className = 'todo-item';
-
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'todo-checkbox';
                 checkbox.checked = completed;
-
                 const todoText = document.createElement('span');
                 todoText.className = 'todo-text';
                 todoText.textContent = text.toUpperCase();
-
                 if (completed) {
                     todoText.classList.add('completed');
                 }
-
                 const removeButton = document.createElement('button');
                 removeButton.className = 'remove-button';
                 removeButton.textContent = 'REMOVE';
-
                 todoItem.appendChild(checkbox);
                 todoItem.appendChild(todoText);
                 todoItem.appendChild(removeButton);
                 list.appendChild(todoItem);
-
-                // Save the item in todoData only if addToData is true
                 if (addToData) {
                     todoData[category].push({ text, completed });
                 }
-
-                // Event listener for the checkbox
                 checkbox.addEventListener('change', (e) => {
                     todoText.classList.toggle('completed');
                     const index = Array.from(list.children).indexOf(todoItem);
                     todoData[category][index].completed = checkbox.checked;
                     updateURLHash();
-                    e.stopPropagation(); // Prevent triggering parent click events
+                    e.stopPropagation();
                 });
-
-                // Event listener for the to-do text
                 todoText.addEventListener('click', (e) => {
                     removeButton.style.display = removeButton.style.display === 'none' ? 'block' : 'none';
-                    e.stopPropagation(); // Prevent triggering parent click events
+                    e.stopPropagation();
                 });
-
-                // Event listener for the remove button
                 removeButton.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const index = Array.from(list.children).indexOf(todoItem);
@@ -417,24 +354,16 @@
                     updateURLHash();
                 });
             }
-
             function renderTodoList() {
-                // Clear existing items
                 document.getElementById('activities-list').innerHTML = '';
                 document.getElementById('food-list').innerHTML = '';
-
-                // Render activities
                 todoData.activities.forEach(item => {
                     addTodoItem(item.text, 'activities', item.completed, false);
                 });
-
-                // Render food items
                 todoData.food.forEach(item => {
                     addTodoItem(item.text, 'food', item.completed, false);
                 });
             }
-
-            // Re-render the to-do list if the URL hash changes (e.g., when the link is shared)
             window.addEventListener('hashchange', () => {
                 if (ignoreHashChange) {
                     ignoreHashChange = false;
