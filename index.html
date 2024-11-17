@@ -3,47 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>Jasmine's To-Do List</title>
-    <!-- Import Press Start 2P font -->
+    <!-- Importing the pixelated font "Press Start 2P" -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        @font-face {
-            font-family: 'Zpix';
-            src: url('https://raw.githubusercontent.com/SolidZORO/zpix-pixel-font/master/dist/Zpix.ttf') format('truetype');
-            font-display: swap;
-        }
-
-        /* Function to detect if text contains Chinese characters */
-        @property --is-chinese {
-            syntax: '<integer>';
-            initial-value: 0;
-            inherits: false;
-        }
-
         body {
             margin: 0;
             padding: 20px;
             background-color: #FFFFFF;
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P'; /* Removed fallback fonts */
         }
-
         .title {
             text-align: center;
             margin-bottom: 40px;
-            font-size: 20px;
+            font-size: 20px; /* Optimized for mobile */
             letter-spacing: 1px;
             text-transform: uppercase;
             font-weight: 700;
             white-space: nowrap;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
         }
-
         .section-header {
-            font-size: 14px;
+            font-size: 14px; 
             text-decoration: underline;
             margin-bottom: 20px;
             font-weight: bold;
             text-transform: uppercase;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
         }
-
         .add-button {
             position: fixed;
             bottom: 40px;
@@ -55,29 +41,27 @@
             background-color: #FEFAE0;
             border: none;
             color: black;
-            font-size: 32px;
+            font-size: 32px; 
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
             z-index: 1000;
         }
-
         .container {
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Stack sections vertically */
             gap: 20px;
             max-width: 100%;
             margin: 0 auto;
         }
-
         .section {
             flex: 1 1 100%;
             padding: 20px;
             background-color: #FFFFFF;
             border-radius: 10px;
         }
-
         .todo-item {
             display: flex;
             align-items: center;
@@ -85,38 +69,24 @@
             padding: 4px;
             background-color: #FFFFFF;
             font-size: 11px;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
         }
-
         .todo-checkbox {
             margin-right: 8px;
             width: 20px;
             height: 20px;
         }
-
-        /* Special handling for todo text to support mixed languages */
         .todo-text {
             flex-grow: 1;
-            cursor: pointer;
-            line-height: 1.5;
-            text-decoration: none;
-        }
-
-        /* Apply different fonts based on content */
-        .chinese-text {
-            font-family: 'Zpix', monospace;
-            letter-spacing: 0;
-            text-transform: none;
-        }
-
-        .english-text {
-            font-family: 'Press Start 2P', monospace;
             text-transform: uppercase;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            cursor: pointer;
+            line-height: 1;
+            text-decoration: none; /* Ensure text decoration can be applied */
         }
-
         .todo-text.completed {
             text-decoration: line-through;
         }
-
         .remove-button {
             display: none;
             background-color: #ff4444;
@@ -125,11 +95,10 @@
             padding: 6px 10px;
             border-radius: 3px;
             cursor: pointer;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 10px;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            font-size: 10px; 
             text-transform: lowercase;
         }
-
         .modal {
             display: none;
             position: fixed;
@@ -139,7 +108,6 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
         }
-
         .modal-content {
             background-color: #FFFFFF;
             padding: 20px;
@@ -152,39 +120,27 @@
             max-width: 300px;
             box-sizing: border-box;
         }
-
         .modal-content-inner {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         .modal input {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
             font-size: 11px;
             box-sizing: border-box;
         }
-
-        /* Apply Zpix font when typing Chinese */
-        .modal input:lang(zh-CN) {
-            font-family: 'Zpix', monospace;
-        }
-
-        .modal input:lang(en) {
-            font-family: 'Press Start 2P', monospace;
-        }
-
         .category-buttons {
             display: flex;
             gap: 10px;
             margin: 15px 0;
             width: 100%;
         }
-
         .category-button {
             flex: 1;
             padding: 12px;
@@ -192,18 +148,16 @@
             border-radius: 5px;
             cursor: pointer;
             background-color: #ddd;
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
             font-size: 12px;
             text-transform: uppercase;
             color: black;
             box-sizing: border-box;
         }
-
         .category-button.selected {
             background-color: #4CAF50;
             color: white;
         }
-
         .add-task-button {
             width: 100%;
             padding: 12px;
@@ -213,12 +167,11 @@
             border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Press Start 2P'; /* Ensure pixelated font */
             font-size: 12px;
             text-transform: lowercase;
             box-sizing: border-box;
         }
-
         .add-task-button:disabled {
             background-color: #ddd;
             cursor: not-allowed;
@@ -264,7 +217,7 @@
             apiKey: "AIzaSyAJiSD3sACG_T_uvHO9SIXwXS_ScpTIgh4",
             authDomain: "to-do-list-test-5f277.firebaseapp.com",
             projectId: "to-do-list-test-5f277",
-            storageBucket: "to-do-list-test-5f277.appspot.com",
+            storageBucket: "to-do-list-test-5f277.appspot.com", // Corrected storageBucket
             messagingSenderId: "13468721590",
             appId: "1:13468721590:web:f43c90d6e7b49f12d76117",
             measurementId: "G-NT0K15WSFD"
@@ -273,6 +226,8 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
+
+        // Initialize Firestore
         const db = getFirestore(app);
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -282,11 +237,6 @@
             const categoryButtons = document.querySelectorAll('.category-button');
             const addTaskButton = document.querySelector('.add-task-button');
             let selectedCategory = null;
-
-            // Function to detect if text contains Chinese characters
-            function containsChinese(text) {
-                return /[\u4E00-\u9FFF]/.test(text);
-            }
 
             // Load tasks from Firestore
             function loadTasks() {
@@ -307,6 +257,41 @@
                 });
             }
 
+            addButton.addEventListener('click', () => {
+                modal.style.display = 'block';
+                taskInput.value = '';
+                selectedCategory = null;
+                categoryButtons.forEach(btn => btn.classList.remove('selected'));
+                addTaskButton.disabled = true;
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    categoryButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    selectedCategory = button.dataset.category;
+                    addTaskButton.disabled = !taskInput.value;
+                });
+            });
+
+            taskInput.addEventListener('input', () => {
+                addTaskButton.disabled = !taskInput.value || !selectedCategory;
+            });
+
+            addTaskButton.addEventListener('click', () => {
+                const text = taskInput.value.trim();
+                if (text && selectedCategory) {
+                    addTodoToFirestore(text, selectedCategory);
+                    modal.style.display = 'none';
+                }
+            });
+
             function addTodoItem(text, category, completed = false, index) {
                 const listId = `${category}-list`;
                 const list = document.getElementById(listId);
@@ -320,16 +305,7 @@
 
                 const todoText = document.createElement('span');
                 todoText.className = 'todo-text';
-                
-                // Apply appropriate font based on content
-                if (containsChinese(text)) {
-                    todoText.classList.add('chinese-text');
-                    todoText.textContent = text; // Keep original case for Chinese
-                } else {
-                    todoText.classList.add('english-text');
-                    todoText.textContent = text.toUpperCase(); // Uppercase for English
-                }
-
+                todoText.textContent = text.toUpperCase();
                 if (completed) {
                     todoText.classList.add('completed');
                 }
@@ -387,49 +363,6 @@
                     await setDoc(docRef, { tasks });
                 }
             }
-
-            addButton.addEventListener('click', () => {
-                modal.style.display = 'block';
-                taskInput.value = '';
-                selectedCategory = null;
-                categoryButtons.forEach(btn => btn.classList.remove('selected'));
-                addTaskButton.disabled = true;
-            });
-
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-
-            categoryButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    categoryButtons.forEach(btn => btn.classList.remove('selected'));
-                    button.classList.add('selected');
-                    selectedCategory = button.dataset.category;
-                    addTaskButton.disabled = !taskInput.value;
-                });
-            });
-
-            // Add input event listener to detect language and apply appropriate font
-            taskInput.addEventListener('input', (e) => {
-                addTaskButton.disabled = !e.target.value || !selectedCategory;
-                if (containsChinese(e.target.value)) {
-                    e.target.style.fontFamily = 'Zpix, monospace';
-                    e.target.style.textTransform = 'none';
-                } else {
-                    e.target.style.fontFamily = 'Press Start 2P, monospace';
-                    e.target.style.textTransform = 'uppercase';
-                }
-            });
-
-            addTaskButton.addEventListener('click', () => {
-                const text = taskInput.value.trim();
-                if (text && selectedCategory) {
-                    addTodoToFirestore(text, selectedCategory);
-                    modal.style.display = 'none';
-                }
-            });
 
             loadTasks();
         });
