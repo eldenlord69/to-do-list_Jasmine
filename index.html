@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Jasmine's To-Do List</title>
-    <!-- Importing the pixelated font "Press Start 2P" -->
+    <!-- Importing the pixelated fonts "Press Start 2P" and "Zpix" -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-          @font-face {
+        /* Importing Zpix font via @font-face */
+        @font-face {
             font-family: 'Zpix';
-            src: url('fonts/zpix/Zpix.ttf') format('truetype');
+            src: url('https://unpkg.com/zpix-pixel@1.0.6/dist/fonts/Zpix.ttf') format('truetype'),
+                 url('https://unpkg.com/zpix-pixel@1.0.6/dist/fonts/Zpix.woff2') format('woff2'),
+                 url('https://unpkg.com/zpix-pixel@1.0.6/dist/fonts/Zpix.woff') format('woff');
             font-weight: normal;
             font-style: normal;
+            font-display: swap;
         }
-        
+
         body {
             margin: 0;
             padding: 20px;
             background-color: #FFFFFF;
-            font-family: 'Press Start 2P', 'Zpix';
+            font-family: 'Press Start 2P', 'Zpix', monospace;
         }
         .title {
             text-align: center;
@@ -27,7 +31,7 @@
             text-transform: uppercase;
             font-weight: 700;
             white-space: nowrap;
-            font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            font-family: 'Press Start 2P', 'Zpix', monospace;
         }
         .section-header {
             font-size: 14px; 
@@ -35,7 +39,7 @@
             margin-bottom: 20px;
             font-weight: bold;
             text-transform: uppercase;
-            font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            font-family: 'Press Start 2P', 'Zpix', monospace;
         }
         .add-button {
             position: fixed;
@@ -53,7 +57,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            font-family: 'Press Start 2P', 'Zpix', monospace;
             z-index: 1000;
         }
         .container {
@@ -76,7 +80,7 @@
             padding: 4px;
             background-color: #FFFFFF;
             font-size: 11px;
-            font-family: 'Press Start 2P', 'Zpix'; /* Ensure pixelated font */
+            font-family: 'Press Start 2P', 'Zpix', monospace;
         }
         .todo-checkbox {
             margin-right: 8px;
@@ -86,7 +90,7 @@
         .todo-text {
             flex-grow: 1;
             text-transform: uppercase;
-            font-family: 'Press Start 2P', 'Zpix'; /* Ensure pixelated font */
+            font-family: 'Press Start 2P', 'Zpix', monospace;
             cursor: pointer;
             line-height: 1;
             text-decoration: none; /* Ensure text decoration can be applied */
@@ -102,7 +106,7 @@
             padding: 6px 10px;
             border-radius: 3px;
             cursor: pointer;
-            font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            font-family: 'Press Start 2P', 'Zpix', monospace;
             font-size: 10px; 
             text-transform: lowercase;
         }
@@ -138,7 +142,7 @@
             margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-family: 'Press Start 2P', 'Zpix'; /* Ensure pixelated font */
+            font-family: 'Press Start 2P', 'Zpix', monospace;
             font-size: 11px;
             box-sizing: border-box;
         }
@@ -155,7 +159,7 @@
             border-radius: 5px;
             cursor: pointer;
             background-color: #ddd;
-            font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            font-family: 'Press Start 2P', 'Zpix', monospace;
             font-size: 12px;
             text-transform: uppercase;
             color: black;
@@ -174,7 +178,7 @@
             border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
-            font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            font-family: 'Press Start 2P', 'Zpix', monospace;
             font-size: 12px;
             text-transform: lowercase;
             box-sizing: border-box;
