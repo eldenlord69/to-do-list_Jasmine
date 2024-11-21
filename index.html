@@ -243,273 +243,265 @@
             </div>
         </div>
     </div>
+    
+<!-- Firebase SDK Integration -->
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-    <!-- Firebase SDK Integration -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAJiSD3sACG_T_uvHO9SIXwXS_ScpTIgh4",
+        authDomain: "to-do-list-test-5f277.firebaseapp.com",
+        projectId: "to-do-list-test-5f277",
+        storageBucket: "to-do-list-test-5f277.appspot.com", // Corrected storageBucket
+        messagingSenderId: "13468721590",
+        appId: "1:13468721590:web:f43c90d6e7b49f12d76117",
+        measurementId: "G-NT0K15WSFD"
+    };
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAJiSD3sACG_T_uvHO9SIXwXS_ScpTIgh4",
-            authDomain: "to-do-list-test-5f277.firebaseapp.com",
-            projectId: "to-do-list-test-5f277",
-            storageBucket: "to-do-list-test-5f277.appspot.com", // Corrected storageBucket
-            messagingSenderId: "13468721590",
-            appId: "1:13468721590:web:f43c90d6e7b49f12d76117",
-            measurementId: "G-NT0K15WSFD"
-        };
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
+    // Initialize Firestore
+    const db = getFirestore(app);
 
-        // Initialize Firestore
-        const db = getFirestore(app);
+    document.addEventListener('DOMContentLoaded', () => {
+        const addButton = document.querySelector('.add-button');
+        const modal = document.getElementById('add-modal');
+        const taskInput = document.getElementById('new-task');
+        const categoryButtons = document.querySelectorAll('.category-button');
+        const addTaskButton = document.querySelector('.add-task-button');
+        let selectedCategory = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const addButton = document.querySelector('.add-button');
-            const modal = document.getElementById('add-modal');
-            const taskInput = document.getElementById('new-task');
-            const categoryButtons = document.querySelectorAll('.category-button');
-            const addTaskButton = document.querySelector('.add-task-button');
-            let selectedCategory = null;
+        // Load tasks from Firestore
+        function loadTasks() {
+            ['activities', 'food'].forEach(category => {
+                const list = document.getElementById(`${category}-list`);
+                list.innerHTML = '';
 
-            // Load tasks from Firestore
-            function loadTasks() {
-                ['activities', 'food'].forEach(category => {
-                    const list = document.getElementById(`${category}-list`);
+                // Set up a real-time listener for the category
+                const docRef = doc(db, 'todos', category);
+                onSnapshot(docRef, (docSnap) => {
+                    const data = docSnap.data();
+                    const tasks = data ? data.tasks : [];
+
                     list.innerHTML = '';
-
-                    // Set up a real-time listener for the category
-                    const docRef = doc(db, 'todos', category);
-                    onSnapshot(docRef, (docSnap) => {
-                        const data = docSnap.data();
-                        const tasks = data ? data.tasks : [];
-                        
-                        list.innerHTML = '';
-                        tasks.forEach((item, index) => {
-                            // Ensure isPriority is a boolean
-                            const isPriority = item.isPriority === true;
-                            addTodoItem(
-                                item.text, 
-                                category, 
-                                item.completed, 
-                                index, 
-                                isPriority
-                            );
-                        });
+                    tasks.forEach((item, index) => {
+                        // Ensure isPriority is a boolean
+                        const isPriority = item.isPriority === true;
+                        addTodoItem(
+                            item.text, 
+                            category, 
+                            item.completed, 
+                            index, 
+                            isPriority
+                        );
                     });
                 });
+            });
+        }
+
+        addButton.addEventListener('click', () => {
+            modal.style.display = 'block';
+            taskInput.value = '';
+            selectedCategory = null;
+            categoryButtons.forEach(btn => btn.classList.remove('selected'));
+            addTaskButton.disabled = true;
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                categoryButtons.forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                selectedCategory = button.dataset.category;
+                addTaskButton.disabled = !taskInput.value;
+            });
+        });
+
+        taskInput.addEventListener('input', () => {
+            addTaskButton.disabled = !taskInput.value || !selectedCategory;
+        });
+
+        addTaskButton.addEventListener('click', async () => {
+            const text = taskInput.value.trim();
+            if (text && selectedCategory) {
+                await addTodoToFirestore(text, selectedCategory);
+                modal.style.display = 'none';
+            }
+        });
+
+        // Update addTodoItem function to support priority
+        function addTodoItem(text, category, completed = false, index, isPriority = false) {
+            const listId = `${category}-list`;
+            const list = document.getElementById(listId);
+            const todoItem = document.createElement('div');
+            todoItem.className = 'todo-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'todo-checkbox';
+            checkbox.checked = completed;
+
+            const todoText = document.createElement('span');
+            todoText.className = 'todo-text';
+            todoText.textContent = text.toUpperCase();
+            if (completed) {
+                todoText.classList.add('completed');
             }
 
-            addButton.addEventListener('click', () => {
-                modal.style.display = 'block';
-                taskInput.value = '';
-                selectedCategory = null;
-                categoryButtons.forEach(btn => btn.classList.remove('selected'));
-                addTaskButton.disabled = true;
-            });
+            const priorityTag = document.createElement('span');
+            priorityTag.className = 'priority-tag';
+            priorityTag.textContent = 'priority';
+            priorityTag.style.display = isPriority ? 'inline-block' : 'none';
 
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
+            const removeButton = document.createElement('button');
+            removeButton.className = 'remove-button';
+            removeButton.textContent = 'REMOVE';
 
-            categoryButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    categoryButtons.forEach(btn => btn.classList.remove('selected'));
-                    button.classList.add('selected');
-                    selectedCategory = button.dataset.category;
-                    addTaskButton.disabled = !taskInput.value;
+            const priorityButton = document.createElement('button');
+            priorityButton.className = 'priority-button';
+            priorityButton.textContent = 'PRIORITY';
+            priorityButton.style.display = isPriority ? 'none' : 'inline-block';
+
+            const deprioritizeButton = document.createElement('button');
+            deprioritizeButton.className = 'deprioritize-button';
+            deprioritizeButton.textContent = 'DEPRIORITIZE';
+            deprioritizeButton.style.display = isPriority ? 'inline-block' : 'none';
+
+            todoItem.appendChild(checkbox);
+            todoItem.appendChild(todoText);
+            todoItem.appendChild(priorityTag);
+            todoItem.appendChild(priorityButton);
+            todoItem.appendChild(deprioritizeButton);
+            todoItem.appendChild(removeButton);
+
+            list.appendChild(todoItem);
+
+            // Event Listener for Priority Button
+            priorityButton.addEventListener('click', () => {
+                priorityTag.style.display = 'inline-block';
+                priorityButton.style.display = 'none';
+                deprioritizeButton.style.display = 'inline-block';
+                updateTaskInFirestore(category, index, { 
+                    isPriority: true 
                 });
             });
 
-            taskInput.addEventListener('input', () => {
-                addTaskButton.disabled = !taskInput.value || !selectedCategory;
+            // Event Listener for Deprioritize Button
+            deprioritizeButton.addEventListener('click', () => {
+                priorityTag.style.display = 'none';
+                priorityButton.style.display = 'inline-block';
+                deprioritizeButton.style.display = 'none';
+                updateTaskInFirestore(category, index, { 
+                    isPriority: false 
+                });
             });
 
-            addTaskButton.addEventListener('click', async () => {
-                const text = taskInput.value.trim();
-                if (text && selectedCategory) {
-                    await addTodoToFirestore(text, selectedCategory);
-                    modal.style.display = 'none';
-                }
-            });
-
-            // Update addTodoItem function to support priority
-            function addTodoItem(text, category, completed = false, index, isPriority = false) {
-                const listId = `${category}-list`;
-                const list = document.getElementById(listId);
-                const todoItem = document.createElement('div');
-                todoItem.className = 'todo-item';
-
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.className = 'todo-checkbox';
-                checkbox.checked = completed;
-
-                const todoText = document.createElement('span');
-                todoText.className = 'todo-text';
-                todoText.textContent = text.toUpperCase();
-                if (completed) {
-                    todoText.classList.add('completed');
-                }
-
-                const priorityTag = document.createElement('span');
-                priorityTag.className = 'priority-tag';
-                priorityTag.textContent = 'priority';
-                priorityTag.style.display = isPriority ? 'inline-block' : 'none';
-
-                const removeButton = document.createElement('button');
-                removeButton.className = 'remove-button';
-                removeButton.textContent = 'REMOVE';
-
-                const priorityButton = document.createElement('button');
-                priorityButton.className = 'priority-button';
-                priorityButton.textContent = 'PRIORITY';
-
-                const deprioritizeButton = document.createElement('button');
-                deprioritizeButton.className = 'deprioritize-button';
-                deprioritizeButton.textContent = 'DEPRIORITIZE';
-                deprioritizeButton.style.display = isPriority ? 'inline-block' : 'none';
-
-                todoItem.appendChild(checkbox);
-                todoItem.appendChild(todoText);
-                todoItem.appendChild(priorityTag);
-                todoItem.appendChild(priorityButton);
-                todoItem.appendChild(deprioritizeButton);
-                todoItem.appendChild(removeButton);
-
-                // Display priority button based on isPriority
-                if (isPriority) {
-                    todoItem.style.fontStyle = 'italic';
-                    deprioritizeButton.style.display = 'inline-block';
-                    priorityButton.style.display = 'none';
-                } else {
-                    deprioritizeButton.style.display = 'none';
-                    priorityButton.style.display = 'inline-block';
-                }
-
-                list.appendChild(todoItem);
-
-                priorityButton.addEventListener('click', () => {
-                    todoText.style.fontStyle = 'italic';
-                    priorityTag.style.display = 'inline-block';
-                    priorityButton.style.display = 'none';
-                    deprioritizeButton.style.display = 'inline-block';
-                    updateTaskInFirestore(category, index, { 
-                        isPriority: true 
-                    });
+            // Event Listener for Checkbox
+            checkbox.addEventListener('change', () => {
+                todoText.classList.toggle('completed', checkbox.checked);
+                updateTaskInFirestore(category, index, { 
+                    completed: checkbox.checked 
                 });
 
-                deprioritizeButton.addEventListener('click', () => {
-                    todoText.style.fontStyle = 'normal';
+                // If task is marked as completed, hide priority elements
+                if (checkbox.checked) {
                     priorityTag.style.display = 'none';
                     priorityButton.style.display = 'inline-block';
                     deprioritizeButton.style.display = 'none';
                     updateTaskInFirestore(category, index, { 
                         isPriority: false 
                     });
-                });
-
-                checkbox.addEventListener('change', () => {
-                    todoText.classList.toggle('completed', checkbox.checked);
-                    
-                    if (checkbox.checked && isPriority) {
-                        // If task is completed and was priority, remove priority
-                        todoText.style.fontStyle = 'normal';
-                        priorityTag.style.display = 'none';
-                        deprioritizeButton.style.display = 'none';
-                        priorityButton.style.display = 'inline-block';
-                        updateTaskInFirestore(category, index, { 
-                            completed: checkbox.checked,
-                            isPriority: false
-                        });
-                    } else {
-                        updateTaskInFirestore(category, index, { 
-                            completed: checkbox.checked
-                        });
-                    }
-                });
-
-                todoText.addEventListener('click', () => {
-                    const isRemoveVisible = removeButton.style.display !== 'none';
-                    removeButton.style.display = isRemoveVisible ? 'none' : 'block';
-                    priorityButton.style.display = isRemoveVisible ? 'none' : (isPriority ? 'none' : 'block');
-                    deprioritizeButton.style.display = 
-                        (priorityTag.style.display === 'inline-block' && !isRemoveVisible) ? 'block' : 'none';
-                });
-
-                removeButton.addEventListener('click', () => {
-                    removeTaskFromFirestore(category, index);
-                });
-            }
-
-            // Update addTodoToFirestore to include priority flag
-            async function addTodoToFirestore(text, category) {
-                try {
-                    const docRef = doc(db, 'todos', category);
-                    const docSnap = await getDoc(docRef);
-                    let tasks = [];
-                    if (docSnap.exists()) {
-                        tasks = docSnap.data().tasks;
-                    }
-                    tasks.push({ 
-                        text, 
-                        completed: false,
-                        isPriority: false 
-                    });
-                    await setDoc(docRef, { tasks });
-                } catch (error) {
-                    console.error("Error adding task:", error);
                 }
-            }
+            });
 
-            async function updateTaskInFirestore(category, index, updates) {
-                try {
-                    const docRef = doc(db, 'todos', category);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        const tasks = docSnap.data().tasks;
-                        if (tasks[index]) {
-                            Object.assign(tasks[index], updates);
-                            await setDoc(docRef, { tasks });
-                        } else {
-                            console.error(`Task at index ${index} does not exist in category "${category}".`);
-                        }
-                    } else {
-                        console.error(`Category "${category}" does not exist in Firestore.`);
-                    }
-                } catch (error) {
-                    console.error("Error updating task:", error);
+            // Event Listener for Todo Text (to toggle Remove and Priority Buttons)
+            todoText.addEventListener('click', () => {
+                const isRemoveVisible = removeButton.style.display !== 'none';
+                removeButton.style.display = isRemoveVisible ? 'none' : 'block';
+                priorityButton.style.display = isRemoveVisible ? 'none' : (isPriority ? 'none' : 'inline-block');
+                deprioritizeButton.style.display = 
+                    (priorityTag.style.display === 'inline-block' && !isRemoveVisible) ? 'inline-block' : 'none';
+            });
+
+            // Event Listener for Remove Button
+            removeButton.addEventListener('click', () => {
+                removeTaskFromFirestore(category, index);
+            });
+        }
+
+        // Function to Add Task to Firestore
+        async function addTodoToFirestore(text, category) {
+            try {
+                const docRef = doc(db, 'todos', category);
+                const docSnap = await getDoc(docRef);
+                let tasks = [];
+                if (docSnap.exists()) {
+                    tasks = docSnap.data().tasks;
                 }
+                tasks.push({ 
+                    text, 
+                    completed: false,
+                    isPriority: false 
+                });
+                await setDoc(docRef, { tasks });
+            } catch (error) {
+                console.error("Error adding task:", error);
             }
+        }
 
-            async function removeTaskFromFirestore(category, index) {
-                try {
-                    const docRef = doc(db, 'todos', category);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        const tasks = docSnap.data().tasks;
-                        if (tasks[index]) {
-                            tasks.splice(index, 1);
-                            await setDoc(docRef, { tasks });
-                        } else {
-                            console.error(`Task at index ${index} does not exist in category "${category}".`);
-                        }
+        // Function to Update Task in Firestore
+        async function updateTaskInFirestore(category, index, updates) {
+            try {
+                const docRef = doc(db, 'todos', category);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const tasks = docSnap.data().tasks;
+                    if (tasks[index]) {
+                        Object.assign(tasks[index], updates);
+                        await setDoc(docRef, { tasks });
                     } else {
-                        console.error(`Category "${category}" does not exist in Firestore.`);
+                        console.error(`Task at index ${index} does not exist in category "${category}".`);
                     }
-                } catch (error) {
-                    console.error("Error removing task:", error);
+                } else {
+                    console.error(`Category "${category}" does not exist in Firestore.`);
                 }
+            } catch (error) {
+                console.error("Error updating task:", error);
             }
+        }
 
-            loadTasks();
-        </script>
-</body>
-</html>
+        // Function to Remove Task from Firestore
+        async function removeTaskFromFirestore(category, index) {
+            try {
+                const docRef = doc(db, 'todos', category);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const tasks = docSnap.data().tasks;
+                    if (tasks[index]) {
+                        tasks.splice(index, 1);
+                        await setDoc(docRef, { tasks });
+                    } else {
+                        console.error(`Task at index ${index} does not exist in category "${category}".`);
+                    }
+                } else {
+                    console.error(`Category "${category}" does not exist in Firestore.`);
+                }
+            } catch (error) {
+                console.error("Error removing task:", error);
+            }
+        }
+
+        loadTasks();
+    });
+</script>
