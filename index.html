@@ -6,6 +6,7 @@
     <!-- Importing the pixelated font "Press Start 2P" -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
+        /* Existing CSS */
         body {
             margin: 0;
             padding: 20px;
@@ -49,12 +50,12 @@
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Adds subtle shadow */
             transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
+        }
 
         .add-button:hover {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
             transform: translateY(-1px);
-}
+        }
         .container {
             display: flex;
             flex-direction: column; /* Stack sections vertically */
@@ -182,6 +183,35 @@
             background-color: #ddd;
             cursor: not-allowed;
         }
+
+        /* New CSS for Priority Feature */
+        .priority-tag {
+            background-color: darkblue;
+            color: white;
+            padding: 2px 4px;
+            margin-left: 8px;
+            font-size: 10px;
+            text-transform: lowercase;
+            border-radius: 3px;
+        }
+
+        .priority-button, .deprioritize-button {
+            display: none;
+            background-color: darkblue;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Press Start 2P';
+            font-size: 10px;
+            text-transform: lowercase;
+            margin-right: 8px;
+        }
+
+        .deprioritize-button {
+            background-color: grey;
+        }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -211,7 +241,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Integration -->
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
@@ -255,9 +284,21 @@
                     onSnapshot(docRef, (docSnap) => {
                         const data = docSnap.data();
                         const tasks = data ? data.tasks : [];
+
+                        // Sort tasks: priority tasks first
+                        const sortedTasks = tasks.sort((a, b) => 
+                            (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0)
+                        );
+
                         list.innerHTML = '';
-                        tasks.forEach((item, index) => {
-                            addTodoItem(item.text, category, item.completed, index);
+                        sortedTasks.forEach((item, index) => {
+                            addTodoItem(
+                                item.text, 
+                                category, 
+                                item.completed, 
+                                index, 
+                                item.isPriority
+                            );
                         });
                     });
                 });
@@ -298,7 +339,8 @@
                 }
             });
 
-            function addTodoItem(text, category, completed = false, index) {
+            // Update addTodoItem function to support priority
+            function addTodoItem(text, category, completed = false, index, isPriority = false) {
                 const listId = `${category}-list`;
                 const list = document.getElementById(listId);
                 const todoItem = document.createElement('div');
@@ -316,22 +358,84 @@
                     todoText.classList.add('completed');
                 }
 
+                const priorityTag = document.createElement('span');
+                priorityTag.className = 'priority-tag';
+                priorityTag.textContent = 'priority';
+                priorityTag.style.display = isPriority ? 'inline-block' : 'none';
+
                 const removeButton = document.createElement('button');
                 removeButton.className = 'remove-button';
                 removeButton.textContent = 'REMOVE';
 
+                const priorityButton = document.createElement('button');
+                priorityButton.className = 'priority-button';
+                priorityButton.textContent = 'PRIORITY';
+
+                const deprioritizeButton = document.createElement('button');
+                deprioritizeButton.className = 'deprioritize-button';
+                deprioritizeButton.textContent = 'DEPRIORITIZE';
+                deprioritizeButton.style.display = 'none';
+
                 todoItem.appendChild(checkbox);
                 todoItem.appendChild(todoText);
+                todoItem.appendChild(priorityTag);
+                todoItem.appendChild(priorityButton);
+                todoItem.appendChild(deprioritizeButton);
                 todoItem.appendChild(removeButton);
-                list.appendChild(todoItem);
+
+                if (isPriority) {
+                    list.insertBefore(todoItem, list.firstChild);
+                } else {
+                    list.appendChild(todoItem);
+                }
+
+                priorityButton.addEventListener('click', () => {
+                    todoText.style.fontStyle = 'italic';
+                    priorityTag.style.display = 'inline-block';
+                    priorityButton.style.display = 'none';
+                    deprioritizeButton.style.display = 'inline-block';
+                    updateTaskInFirestore(category, index, { 
+                        isPriority: true 
+                    });
+                    
+                    list.insertBefore(todoItem, list.firstChild);
+                });
+
+                deprioritizeButton.addEventListener('click', () => {
+                    todoText.style.fontStyle = 'normal';
+                    priorityTag.style.display = 'none';
+                    priorityButton.style.display = 'inline-block';
+                    deprioritizeButton.style.display = 'none';
+                    updateTaskInFirestore(category, index, { 
+                        isPriority: false 
+                    });
+                });
 
                 checkbox.addEventListener('change', () => {
                     todoText.classList.toggle('completed', checkbox.checked);
-                    updateTaskInFirestore(category, index, { completed: checkbox.checked });
+                    
+                    if (checkbox.checked && priorityTag.style.display === 'inline-block') {
+                        todoText.style.fontStyle = 'normal';
+                        priorityTag.style.display = 'none';
+                        deprioritizeButton.style.display = 'none';
+                        priorityButton.style.display = 'inline-block';
+                        updateTaskInFirestore(category, index, { 
+                            completed: checkbox.checked,
+                            isPriority: false
+                        });
+                    }
+
+                    updateTaskInFirestore(category, index, { 
+                        completed: checkbox.checked
+                    });
                 });
 
                 todoText.addEventListener('click', () => {
-                    removeButton.style.display = removeButton.style.display === 'none' ? 'block' : 'none';
+                    const isRemoveVisible = removeButton.style.display !== 'none';
+                    removeButton.style.display = isRemoveVisible ? 'none' : 'block';
+                    priorityButton.style.display = isRemoveVisible ? 'none' : 'block';
+                    deprioritizeButton.style.display = 
+                        (priorityTag.style.display === 'inline-block' && !isRemoveVisible) ? 'block' : 'none';
                 });
 
                 removeButton.addEventListener('click', () => {
@@ -339,6 +443,7 @@
                 });
             }
 
+            // Update addTodoToFirestore to include priority flag
             async function addTodoToFirestore(text, category) {
                 const docRef = doc(db, 'todos', category);
                 const docSnap = await getDoc(docRef);
@@ -346,7 +451,11 @@
                 if (docSnap.exists()) {
                     tasks = docSnap.data().tasks;
                 }
-                tasks.push({ text, completed: false });
+                tasks.push({ 
+                    text, 
+                    completed: false,
+                    isPriority: false 
+                });
                 await setDoc(docRef, { tasks });
             }
 
@@ -371,7 +480,6 @@
             }
 
             loadTasks();
-        });
-    </script>
-</body>
+        </script>
+    </body>
 </html>
