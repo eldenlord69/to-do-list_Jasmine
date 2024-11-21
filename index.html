@@ -38,16 +38,16 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background-color: #F8F9FA;
+            background-color: #f8f9fa; /* Light gray background */
             border: none;
-            color: #495057;
+            color: #343a40; /* Dark gray color for the + sign */
             font-size: 32px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            font-weight: bold;
+            font-weight: bold; /* Ensures the + sign is bold */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Adds subtle shadow */
             transition: box-shadow 0.2s ease, transform 0.2s ease;
         }
@@ -77,6 +77,7 @@
             background-color: #FFFFFF;
             font-size: 11px;
             font-family: 'Press Start 2P'; /* Ensure pixelated font */
+            position: relative; /* For positioning buttons */
         }
         .todo-checkbox {
             margin-right: 8px;
@@ -105,6 +106,8 @@
             font-family: 'Press Start 2P'; /* Ensure pixelated font */
             font-size: 10px; 
             text-transform: lowercase;
+            position: absolute;
+            right: 60px;
         }
         .modal {
             display: none;
@@ -241,6 +244,7 @@
         </div>
     </div>
 
+    <!-- Firebase SDK Integration -->
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
@@ -284,20 +288,17 @@
                     onSnapshot(docRef, (docSnap) => {
                         const data = docSnap.data();
                         const tasks = data ? data.tasks : [];
-
-                        // Sort tasks: priority tasks first
-                        const sortedTasks = tasks.sort((a, b) => 
-                            (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0)
-                        );
-
+                        
                         list.innerHTML = '';
-                        sortedTasks.forEach((item, index) => {
+                        tasks.forEach((item, index) => {
+                            // Ensure isPriority is a boolean
+                            const isPriority = item.isPriority === true;
                             addTodoItem(
                                 item.text, 
                                 category, 
                                 item.completed, 
                                 index, 
-                                item.isPriority
+                                isPriority
                             );
                         });
                     });
@@ -331,10 +332,10 @@
                 addTaskButton.disabled = !taskInput.value || !selectedCategory;
             });
 
-            addTaskButton.addEventListener('click', () => {
+            addTaskButton.addEventListener('click', async () => {
                 const text = taskInput.value.trim();
                 if (text && selectedCategory) {
-                    addTodoToFirestore(text, selectedCategory);
+                    await addTodoToFirestore(text, selectedCategory);
                     modal.style.display = 'none';
                 }
             });
@@ -383,11 +384,17 @@
                 todoItem.appendChild(deprioritizeButton);
                 todoItem.appendChild(removeButton);
 
+                // Display priority button based on isPriority
                 if (isPriority) {
-                    list.insertBefore(todoItem, list.firstChild);
+                    todoItem.style.fontStyle = 'italic';
+                    deprioritizeButton.style.display = 'inline-block';
+                    priorityButton.style.display = 'none';
                 } else {
-                    list.appendChild(todoItem);
+                    deprioritizeButton.style.display = 'none';
+                    priorityButton.style.display = 'inline-block';
                 }
+
+                list.appendChild(todoItem);
 
                 priorityButton.addEventListener('click', () => {
                     todoText.style.fontStyle = 'italic';
@@ -397,8 +404,6 @@
                     updateTaskInFirestore(category, index, { 
                         isPriority: true 
                     });
-                    
-                    list.insertBefore(todoItem, list.firstChild);
                 });
 
                 deprioritizeButton.addEventListener('click', () => {
@@ -414,7 +419,8 @@
                 checkbox.addEventListener('change', () => {
                     todoText.classList.toggle('completed', checkbox.checked);
                     
-                    if (checkbox.checked && priorityTag.style.display === 'inline-block') {
+                    if (checkbox.checked && isPriority) {
+                        // If task is completed and was priority, remove priority
                         todoText.style.fontStyle = 'normal';
                         priorityTag.style.display = 'none';
                         deprioritizeButton.style.display = 'none';
@@ -423,17 +429,17 @@
                             completed: checkbox.checked,
                             isPriority: false
                         });
+                    } else {
+                        updateTaskInFirestore(category, index, { 
+                            completed: checkbox.checked
+                        });
                     }
-
-                    updateTaskInFirestore(category, index, { 
-                        completed: checkbox.checked
-                    });
                 });
 
                 todoText.addEventListener('click', () => {
                     const isRemoveVisible = removeButton.style.display !== 'none';
                     removeButton.style.display = isRemoveVisible ? 'none' : 'block';
-                    priorityButton.style.display = isRemoveVisible ? 'none' : 'block';
+                    priorityButton.style.display = isRemoveVisible ? 'none' : (isPriority ? 'none' : 'block');
                     deprioritizeButton.style.display = 
                         (priorityTag.style.display === 'inline-block' && !isRemoveVisible) ? 'block' : 'none';
                 });
@@ -464,8 +470,12 @@
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     const tasks = docSnap.data().tasks;
-                    Object.assign(tasks[index], updates);
-                    await setDoc(docRef, { tasks });
+                    if (tasks[index]) {
+                        Object.assign(tasks[index], updates);
+                        await setDoc(docRef, { tasks });
+                    } else {
+                        console.error(`Task at index ${index} does not exist in category "${category}".`);
+                    }
                 }
             }
 
@@ -474,12 +484,16 @@
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     const tasks = docSnap.data().tasks;
-                    tasks.splice(index, 1);
-                    await setDoc(docRef, { tasks });
+                    if (tasks[index]) {
+                        tasks.splice(index, 1);
+                        await setDoc(docRef, { tasks });
+                    } else {
+                        console.error(`Task at index ${index} does not exist in category "${category}".`);
+                    }
                 }
             }
 
             loadTasks();
         </script>
-    </body>
+</body>
 </html>
