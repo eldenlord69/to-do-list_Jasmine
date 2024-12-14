@@ -18,13 +18,16 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             font-weight: 700;
+            white-space: nowrap;
+            font-family: 'Press Start 2P';
         }
         .section-header {
-            font-size: 14px;
+            font-size: 14px; 
             text-decoration: underline;
             margin-bottom: 20px;
             font-weight: bold;
             text-transform: uppercase;
+            font-family: 'Press Start 2P';
         }
         .add-button {
             position: fixed;
@@ -35,11 +38,14 @@
             border-radius: 50%;
             background-color: #F8F9FA;
             border: none;
+            color: #495057;
             font-size: 32px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 1000;
+            font-weight: bold;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: box-shadow 0.2s ease, transform 0.2s ease;
         }
@@ -67,8 +73,10 @@
             padding: 4px;
             background-color: #FFFFFF;
             font-size: 11px;
+            font-family: 'Press Start 2P';
             cursor: move;
             user-select: none;
+            -webkit-user-select: none;
             transition: background-color 0.2s ease;
         }
         .todo-item.dragging {
@@ -83,8 +91,10 @@
         .todo-text {
             flex-grow: 1;
             text-transform: uppercase;
+            font-family: 'Press Start 2P';
             cursor: pointer;
             line-height: 1;
+            text-decoration: none;
         }
         .todo-text.completed {
             text-decoration: line-through;
@@ -97,6 +107,9 @@
             padding: 6px 10px;
             border-radius: 3px;
             cursor: pointer;
+            font-family: 'Press Start 2P';
+            font-size: 10px; 
+            text-transform: lowercase;
         }
         .modal {
             display: none;
@@ -117,6 +130,22 @@
             transform: translate(-50%, -50%);
             width: 80%;
             max-width: 300px;
+            box-sizing: border-box;
+        }
+        .modal-content-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Press Start 2P';
+            font-size: 11px;
+            box-sizing: border-box;
         }
         .category-buttons {
             display: flex;
@@ -127,11 +156,15 @@
         .category-button {
             flex: 1;
             padding: 12px;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
             background-color: #ddd;
+            font-family: 'Press Start 2P';
             font-size: 12px;
             text-transform: uppercase;
+            color: black;
+            box-sizing: border-box;
         }
         .category-button.selected {
             background-color: #4CAF50;
@@ -142,8 +175,14 @@
             padding: 12px;
             background-color: #4CAF50;
             color: white;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-top: 10px;
+            font-family: 'Press Start 2P';
+            font-size: 12px;
+            text-transform: lowercase;
+            box-sizing: border-box;
         }
         .add-task-button:disabled {
             background-color: #ddd;
@@ -167,88 +206,249 @@
     </div>
     <div class="modal" id="add-modal">
         <div class="modal-content">
-            <input type="text" id="new-task" placeholder="Enter Your Task">
-            <div class="category-buttons">
-                <button class="category-button" data-category="activities">ACTIVITIES</button>
-                <button class="category-button" data-category="food">FOOD</button>
+            <div class="modal-content-inner">
+                <input type="text" id="new-task" placeholder="ENTER YOUR TASK">
+                <div class="category-buttons">
+                    <button class="category-button" data-category="activities">ACTIVITIES</button>
+                    <button class="category-button" data-category="food">FOOD</button>
+                </div>
+                <button class="add-task-button" disabled>ADD</button>
             </div>
-            <button class="add-task-button" disabled>ADD</button>
         </div>
     </div>
-
+    
+<!-- Firebase SDK Integration -->
     <script type="module">
+        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAJiSD3sACG_T_uvHO9SIXwXS_ScpTIgh4",
             authDomain: "to-do-list-test-5f277.firebaseapp.com",
             projectId: "to-do-list-test-5f277",
+            storageBucket: "to-do-list-test-5f277.appspot.com",
+            messagingSenderId: "13468721590",
+            appId: "1:13468721590:web:f43c90d6e7b49f12d76117",
+            measurementId: "G-NT0K15WSFD"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        // Initialize Firestore
         const db = getFirestore(app);
 
-        const modal = document.getElementById("add-modal");
-        const addTaskButton = document.querySelector(".add-task-button");
-        const taskInput = document.getElementById("new-task");
-        const addButton = document.querySelector(".add-button");
-        let selectedCategory = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            const addButton = document.querySelector('.add-button');
+            const modal = document.getElementById('add-modal');
+            const taskInput = document.getElementById('new-task');
+            const categoryButtons = document.querySelectorAll('.category-button');
+            const addTaskButton = document.querySelector('.add-task-button');
+            let selectedCategory = null;
 
-        function addTodoItem(text, category, completed, index) {
-            const listId = `${category}-list`;
-            const list = document.getElementById(listId);
-            const todoItem = document.createElement("div");
-            todoItem.className = "todo-item";
-            todoItem.draggable = true;
+            function addTodoItem(text, category, completed = false, index) {
+                const listId = `${category}-list`;
+                const list = document.getElementById(listId);
+                const todoItem = document.createElement('div');
+                todoItem.className = 'todo-item';
+                todoItem.draggable = true;
+                todoItem.setAttribute('data-index', index);
 
-            todoItem.innerHTML = `
-                <input type="checkbox" class="todo-checkbox" ${completed ? "checked" : ""}>
-                <span class="todo-text ${completed ? "completed" : ""}">${text.toUpperCase()}</span>
-                <button class="remove-button">REMOVE</button>
-            `;
-            list.appendChild(todoItem);
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'todo-checkbox';
+                checkbox.checked = completed;
 
-            todoItem.addEventListener("dragstart", (e) => {
-                todoItem.classList.add("dragging");
-                e.dataTransfer.setData("text/plain", index);
-                e.dataTransfer.setData("category", category);
-            });
+                const todoText = document.createElement('span');
+                todoText.className = 'todo-text';
+                todoText.textContent = text.toUpperCase();
+                if (completed) {
+                    todoText.classList.add('completed');
+                }
 
-            todoItem.addEventListener("dragend", () => {
-                todoItem.classList.remove("dragging");
-            });
+                const removeButton = document.createElement('button');
+                removeButton.className = 'remove-button';
+                removeButton.textContent = 'REMOVE';
 
-            const checkbox = todoItem.querySelector(".todo-checkbox");
-            checkbox.addEventListener("change", () => {
-                updateTask(category, index, { completed: checkbox.checked });
-            });
-        }
+                todoItem.appendChild(checkbox);
+                todoItem.appendChild(todoText);
+                todoItem.appendChild(removeButton);
+                list.appendChild(todoItem);
 
-        function updateTask(category, index, changes) {
-            // Firestore task update logic
-        }
+                // Add drag event listeners
+                todoItem.addEventListener('dragstart', (e) => {
+                    todoItem.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', index.toString());
+                    e.dataTransfer.setData('category', category);
+                });
 
-        function reorderTasks(category, fromIndex, toIndex) {
-            // Firestore reorder logic
-        }
+                todoItem.addEventListener('dragend', () => {
+                    todoItem.classList.remove('dragging');
+                });
 
-        function loadTasks() {
-            ["activities", "food"].forEach((category) => {
-                const list = document.getElementById(`${category}-list`);
-                const docRef = doc(db, "todos", category);
+                todoItem.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
 
-                onSnapshot(docRef, (docSnap) => {
-                    const tasks = docSnap.data()?.tasks || [];
-                    list.innerHTML = "";
-                    tasks.forEach((task, index) => {
-                        addTodoItem(task.text, category, task.completed, index);
+                todoItem.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                    const draggedCategory = e.dataTransfer.getData('category');
+                    const dropIndex = index;
+
+                    if (draggedCategory === category && draggedIndex !== dropIndex) {
+                        await reorderTasks(category, draggedIndex, dropIndex);
+                    }
+                });
+
+                checkbox.addEventListener('change', () => {
+                    todoText.classList.toggle('completed', checkbox.checked);
+                    updateTaskInFirestore(category, index, { completed: checkbox.checked });
+                });
+
+                todoText.addEventListener('click', () => {
+                    removeButton.style.display = removeButton.style.display === 'none' ? 'block' : 'none';
+                });
+
+                removeButton.addEventListener('click', () => {
+                    removeTaskFromFirestore(category, index);
+                });
+            }
+
+            async function reorderTasks(category, fromIndex, toIndex) {
+                const docRef = doc(db, 'todos', category);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const tasks = docSnap.data().tasks;
+                    
+                    // Remove the task from the old position and insert it at the new position
+                    const [movedTask] = tasks.splice(fromIndex, 1);
+                    tasks.splice(toIndex, 0, movedTask);
+                    
+                    // Update Firebase with the new order
+                    await setDoc(docRef, { tasks });
+                }
+            }
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.todo-item:not(.dragging)')];
+                
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+
+            function loadTasks() {
+                ['activities', 'food'].forEach(category => {
+                    const list = document.getElementById(`${category}-list`);
+                    list.innerHTML = '';
+
+                    const docRef = doc(db, 'todos', category);
+                    onSnapshot(docRef, (docSnap) => {
+                        const data = docSnap.data();
+                        const tasks = data ? data.tasks : [];
+                        list.innerHTML = '';
+                        tasks.forEach((item, index) => {
+                            addTodoItem(item.text, category, item.completed, index);
+                        });
+                    });
+
+                    // Add list-level drag and drop handlers
+                    list.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        const draggingItem = document.querySelector('.dragging');
+                        if (draggingItem) {
+                            const afterElement = getDragAfterElement(list, e.clientY);
+                            if (afterElement) {
+                                list.insertBefore(draggingItem, afterElement);
+                            } else {
+                                list.appendChild(draggingItem);
+                            }
+                        }
                     });
                 });
-            });
-        }
+            }
 
-        loadTasks();
+            addButton.addEventListener('click', () => {
+                modal.style.display = 'block';
+                taskInput.value = '';
+                selectedCategory = null;
+                categoryButtons.forEach(btn => btn.classList.remove('selected'));
+                addTaskButton.disabled = true;
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    categoryButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    selectedCategory = button.dataset.category;
+                    addTaskButton.disabled = !taskInput.value;
+                });
+            });
+
+            taskInput.addEventListener('input', () => {
+                addTaskButton.disabled = !taskInput.value || !selectedCategory;
+            });
+
+            addTaskButton.addEventListener('click', () => {
+                const text = taskInput.value.trim();
+                if (text && selectedCategory) {
+                    addTodoToFirestore(text, selectedCategory);
+                    modal.style.display = 'none';
+                }
+            });
+
+            async function addTodoToFirestore(text, category) {
+                const docRef = doc(db, 'todos', category);
+                const docSnap = await getDoc(docRef);
+                let tasks = [];
+                if (docSnap.exists()) {
+                    tasks = docSnap.data().tasks;
+                }
+                tasks.push({ text, completed: false });
+                await setDoc(docRef, { tasks });
+            }
+
+            async function updateTaskInFirestore(category, index, updates) {
+                const docRef = doc(db, 'todos', category);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const tasks = docSnap.data().tasks;
+                    Object.assign(tasks[index], updates);
+                    await setDoc(docRef, { tasks });
+                }
+            }
+
+            async function removeTaskFromFirestore(category, index) {
+                const docRef = doc(db, 'todos', category);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const tasks = docSnap.data().tasks;
+                    tasks.splice(index, 1);
+                    await setDoc(docRef, { tasks });
+                }
+            }
+
+            loadTasks();
+        });
     </script>
 </body>
 </html>
